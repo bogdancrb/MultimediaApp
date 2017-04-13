@@ -1,0 +1,95 @@
+<!-- VIDEO CANVAS DEMO: http://stackoverflow.com/questions/4429440/html5-display-video-inside-canvas-->
+<!-- SKETCH: http://intridea.github.io/sketch.js/ -->
+<!-- SVG: https://www.w3schools.com/graphics/svg_intro.asp -->
+<!-- GRAPHS: http://www.tutorialspark.com/html5/HTML5_Canvas_dataplot_Demo.php-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+<script src="jquery-3.2.0.js"></script>
+<script src="sketch.js"></script>
+<body>
+<div class="container" style="background-color: beige; height: 500px; width: 1024px">
+    <canvas id="myCanvas" width="1024" height="500" style="display: none"></canvas>
+    <canvas id="simpleSketch" width="1024" height="500" style="display: none"></canvas>
+</div>
+<button class="inputText">Input text</button>
+<button class="draw">Draw</button>
+<button class="drawForms">Draw forms</button>
+<button class="generateGraph">Generate graph</button>
+<button class="loadVideo">Load video</button>
+<button class="clearAll">CLEAR ALL</button>
+<input type="text" name="canvasText" id="myInput" placeholder="Input text" style="display: none;">
+</body>
+
+<script>
+    var myCanvas = $('#myCanvas');
+    var canvasContainer = document.getElementById("myCanvas");
+    var ctx = canvasContainer.getContext("2d");
+
+    var clickPosX = 0;
+    var clickPosY = 0;
+
+    var inputTextEnabled;
+    var drawEnabled;
+    var drawFormsEnabled;
+    var generateGraphEnabled;
+    var loadVideoEnabled;
+
+    var setToDefaults = function() {
+        inputTextEnabled = false;
+        drawEnabled = false;
+        drawFormsEnabled = false;
+        generateGraphEnabled = false;
+        loadVideoEnabled = false;
+
+        $('#myInput').css('display', 'none');
+        $('#myCanvas').css('display', 'none');
+
+        $('#simpleSketch').css('display', 'none');
+    };
+
+    $(document).ready(function() {
+        setToDefaults();
+
+        $('.inputText').on('click', function() {
+            setToDefaults();
+
+           inputTextEnabled = true;
+
+            $('#myInput').css('display', 'block');
+            $('#myCanvas').css('display', '');
+        });
+
+        $('.draw').on('click', function() {
+            setToDefaults();
+
+            drawEnabled = true;
+
+            $('#simpleSketch').css('display', 'block');
+            $('#simpleSketch').sketch();
+        });
+
+        $('.container').on('click', function(e) {
+            if (inputTextEnabled)
+            {
+                clickPosX = e.pageX;
+                clickPosY = e.pageY;
+            }
+        });
+
+        $('#myInput').on('change', function() {
+            if (inputTextEnabled)
+            {
+                var inputText = $(this).val();
+
+                ctx.font = "30px Arial";
+                ctx.strokeText(inputText, clickPosX, clickPosY, 1000);
+            }
+        });
+    });
+</script>
+
+</html>
