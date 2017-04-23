@@ -11,6 +11,7 @@
 <script src="jquery-3.2.0.js"></script>
 <script src="sketch.js"></script>
 <body>
+<video id="video" src="http://upload.wikimedia.org/wikipedia/commons/7/79/Big_Buck_Bunny_small.ogv" controls loop style="display: none"></video>
 <div class="container" style="background-color: beige; height: 500px; width: 1024px">
     <div class="myCanvas">
         <canvas id="myCanvas" width="1024" height="500" style="display: none"></canvas>
@@ -20,6 +21,9 @@
     </div>
     <div class="graphCanvas">
         <canvas id="graphCanvas" width="1024" height="500" style="display: none"></canvas>
+    </div>
+    <div class="theaterCanvas">
+        <canvas id="theaterCanvas" width="1024" height="500" style="display: none"></canvas>
     </div>
 </div>
 <button class="inputText">Input text</button>
@@ -32,7 +36,6 @@
 </body>
 
 <script>
-    var myCanvas = $('#myCanvas');
     var canvasContainer = document.getElementById("myCanvas");
     var ctx = canvasContainer.getContext("2d");
 
@@ -45,8 +48,9 @@
     var generateGraphEnabled;
     var loadVideoEnabled;
 
-    var canvas ;
-    var context ;
+    var canvas = document.getElementById("graphCanvas");
+    var context = canvas.getContext("2d");
+
     var Val_max;
     var Val_min;
     var sections;
@@ -57,7 +61,23 @@
     var Samsung = [30, 50, 70, 80, 90, 100, 95, 91, 85, 92, 99, 130];
     var Nokia =   [20, -10, -20, -25, -40, 5, 10, 28, 30, 43, 65, 80];
 
-    function init() {
+    var graphDraw = false;
+
+    var canvasVideo = document.getElementById('theaterCanvas');
+    var ctxVidep = canvasVideo.getContext('2d');
+    var video = document.getElementById('video');
+
+    video.addEventListener('play', function() {
+        var $this = this; //cache
+        (function loop() {
+            if (!$this.paused && !$this.ended) {
+                ctxVidep.drawImage($this, 0, 0);
+                setTimeout(loop, 1000 / 30); // drawing at 30fps
+            }
+        })();
+    }, 0);
+
+    function graphInit() {
         // set these values for your data
         sections = 12;
         Val_max = 130;
@@ -68,7 +88,6 @@
         var margin = 10;
         var xAxis = [" ", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        canvas = document.getElementById("graphCanvas");
         context = canvas.getContext("2d");
         context.fillStyle = "#0099ff";
         context.font = "20 pt Verdana";
@@ -109,7 +128,6 @@
         plotData(Nokia);
     }
 
-
     function plotData(dataSet) {
         context.beginPath();
         context.moveTo(0, dataSet[0]);
@@ -128,9 +146,11 @@
 
         $('#myInput').css('display', 'none');
         $('#myCanvas').css('display', 'none');
-
         $('#simpleSketch').css('display', 'none');
         $('#graphCanvas').css('display', 'none');
+        $('#theaterCanvas').css('display', 'none');
+
+        video.pause();
     };
 
     $(document).ready(function() {
@@ -142,7 +162,7 @@
            inputTextEnabled = true;
 
             $('#myInput').css('display', 'block');
-            $('#myCanvas').css('display', '');
+            $('#myCanvas').css('display', 'block');
         });
 
         $('.draw').on('click', function() {
@@ -152,6 +172,31 @@
 
             $('#simpleSketch').css('display', 'block');
             $('#simpleSketch').sketch();
+        });
+
+        $('.generateGraph').on('click', function() {
+            setToDefaults();
+
+            generateGraphEnabled = true;
+
+            $('#graphCanvas').css('display', 'block');
+
+            if (!graphDraw)
+            {
+                graphInit();
+            }
+
+            graphDraw = true;
+        });
+
+        $('.loadVideo').on('click', function() {
+            setToDefaults();
+
+            loadVideoEnabled = true;
+
+            $('#theaterCanvas').css('display', 'block');
+
+            video.play();
         });
 
         $('.container').on('click', function(e) {
@@ -166,13 +211,18 @@
             var myCanvas = '<canvas id="myCanvas" width="1024" height="500" style="display: none"></canvas>';
             var simpleSketch = '<canvas id="simpleSketch" width="1024" height="500" style="display: none"></canvas>';
             var graphCanvas = '<canvas id="graphCanvas" width="1024" height="500" style="display: none"></canvas>';
+            var theaterCanvas = ' <canvas id="theaterCanvas" width="1024" height="500" style="display: none"></canvas>';
             var myCanvasElem = $('.myCanvas');
             var simpleSketchElem = $('.simpleSketch');
             var graphCanvasElem = $('.graphCanvas');
+            var theaterCanvasElem = $('.theaterCanvas');
 
             myCanvasElem.html(myCanvas);
             simpleSketchElem.html(simpleSketch);
             graphCanvasElem.html(graphCanvas);
+            theaterCanvasElem.html(theaterCanvas);
+
+            graphDraw = false;
 
             if (drawEnabled)
             {
@@ -182,19 +232,25 @@
             if (inputTextEnabled)
             {
                 $('#myCanvas').css('display', 'block');
+
+                canvasContainer = document.getElementById("myCanvas");
+                ctx = canvasContainer.getContext("2d");
             }
             if (generateGraphEnabled)
             {
-                $('#graphCanvas').css('display', 'block')
+                $('#graphCanvas').css('display', 'block');
+
+                canvas = document.getElementById("graphCanvas");
+                context = canvas.getContext("2d");
             }
-        });
+            if(loadVideoEnabled)
+            {
+                $('#theaterCanvas').css('display', 'block');
 
-        $('.generateGraph').on('click', function() {
-            setToDefaults();
-
-            generateGraphEnabled = true;
-
-            $('#graphCanvas').css('display', 'block');
+                canvasVideo = document.getElementById('theaterCanvas');
+                ctxVidep = canvasVideo.getContext('2d');
+                video = document.getElementById('video');
+            }
         });
 
         $('#myInput').on('change', function() {
@@ -206,8 +262,6 @@
                 ctx.strokeText(inputText, clickPosX, clickPosY, 1000);
             }
         });
-
-        init();
     });
 </script>
 
